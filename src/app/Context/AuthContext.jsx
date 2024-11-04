@@ -86,7 +86,7 @@ export const AuthProvider = ({children}) => {
       setUser(jwtDecode(data.access));
       localStorage.setItem("authTokens", JSON.stringify(data));
     } else {
-      logoutUser();
+      await logoutUser();
     }
 
     if (loading) {
