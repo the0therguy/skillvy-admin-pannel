@@ -11,6 +11,12 @@ import {
 } from "@/components/ui/navigation-menu"
 import Link from "next/link"
 import {useAuth} from "@/app/Context/AuthContext";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+import Image from "next/image";
 
 export default function NavBar() {
   const {isAuthenticated, logout} = useAuth();
@@ -20,8 +26,8 @@ export default function NavBar() {
       <div className="flex items-center justify-between px-4 py-4 bg-gray-100">
         {/* Logo */}
         <div className="flex items-center">
-          <img src="/path/to/logo.png" alt="Logo" className="h-8 w-8 mr-2"/> {/* Replace with your logo path */}
-          <span className="font-semibold text-xl">MyApp</span>
+          {/*<img src="/path/to/logo.png" alt="Logo" className="h-8 w-8 mr-2"/>*/}
+          <Image src="/next.svg" alt="logo" width={100} height={80} />
         </div>
 
         {/* Navigation Menu */}
@@ -29,7 +35,12 @@ export default function NavBar() {
           <NavigationMenuList className="flex items-center">
             {/* User Dropdown */}
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Account</NavigationMenuTrigger>
+              <NavigationMenuTrigger>
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="flex flex-col p-4">
                   {isAuthenticated ? (
