@@ -1,125 +1,56 @@
-import { createContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-
-import { jwtDecode } from "jwt-decode";
+"use client"
+import {createContext, useContext, useEffect, useState} from 'react';
+import {jwtDecode} from "jwt-decode";
 
 const AuthContext = createContext();
 
-export default AuthContext;
-
 export const AuthProvider = ({children}) => {
-  let [authTokens, setAuthTokens] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens"))
-      : null
-  );
-  let [user, setUser] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? jwtDecode(localStorage.getItem("authTokens"))
-      : null
-  );
-  let [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
 
-  let loginUser = async (e) => {
-    e.preventDefault();
-    let response = await fetch(
-      `${import.meta.env["VITE_REACT_API_URL"]}/api/v1/signin/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: e.target.username.value,
-          password: e.target.password.value,
-        }),
-      }
-    );
-    let data = await response.json();
-
-    if (response.status === 200) {
-      setAuthTokens(data);
-      setUser(jwtDecode(data.access));
-      localStorage.setItem("authTokens", JSON.stringify(data));
-      router.push("/");
-    } else {
-      alert("Something went wrong!");
-    }
-  };
-
-  let logoutUser = async () => {
-    let response = await fetch(
-      `${import.meta.env["VITE_REACT_API_URL"]}/api/v1/logout/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authTokens?.access}`,
-        },
-        body: JSON.stringify({ refresh_token: authTokens?.refresh }),
-      }
-    );
-    setAuthTokens(null);
-    setUser(null);
-    localStorage.removeItem("authTokens");
-    history.push("/login");
-  };
-
-  let updateToken = async () => {
-    let response = await fetch(
-      `${import.meta.env["VITE_REACT_API_URL"]}/api/v1/token/refresh/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authTokens?.access}`,
-        },
-        body: JSON.stringify({ refresh: authTokens?.refresh }),
-      }
-    );
-
-    let data = await response.json();
-
-    if (response.status === 200) {
-      setAuthTokens(data);
-      setUser(jwtDecode(data.access));
-      localStorage.setItem("authTokens", JSON.stringify(data));
-    } else {
-      await logoutUser();
-    }
-
-    if (loading) {
-      setLoading(false);
-    }
-  };
-
-  let contextData = {
-    user: user,
-    authTokens: authTokens,
-    loginUser: loginUser,
-    logoutUser: logoutUser,
-  };
-
+  // Check for access token on app load and decode it to get user details
   useEffect(() => {
-    if (loading) {
-      updateToken();
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      setIsAuthenticated(true);
+      setUser(decodeToken(accessToken)); // Decode token to get user data
     }
+  }, []);
 
-    let fourMinutes = 1000 * 60 * 20;
+  const decodeToken = (token) => {
+    try {
+      return jwtDecode(token); // Get user info from token payload
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+      return null;
+    }
+  };
 
-    let interval = setInterval(() => {
-      if (authTokens) {
-        updateToken();
-      }
-    }, fourMinutes);
-    return () => clearInterval(interval);
-  }, [authTokens, loading]);
+  const login = (accessToken, refreshToken) => {
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    setIsAuthenticated(true);
+    const data = decodeToken(accessToken)
+    if (data) {
+      setUser(data);
+      return true
+    }
+    return false
+  };
+
+  const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    setIsAuthenticated(false);
+    setUser(null);
+    return true
+  };
 
   return (
-    <AuthContext.Provider value={contextData}>
-      {loading ? null : children}
+    <AuthContext.Provider value={{isAuthenticated, user, login, logout}}>
+      {children}
     </AuthContext.Provider>
   );
-  
-}
+};
+
+export const useAuth = () => useContext(AuthContext);

@@ -23,6 +23,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {Input} from '@/components/ui/input'
+import baseURL from "@/app/Components/BaseURL";
+import {useAuth} from "@/app/Context/AuthContext";
+import {useState} from "react";
+
 
 const formSchema = z.object({
   username: z.string(),
@@ -41,16 +45,35 @@ export default function LoginComponent() {
     },
   })
 
+  const {login} = useAuth()
+  const [loading, setLoading] = useState(false);
+
   async function onSubmit(values) {
-    debugger
+    setLoading(true)
     try {
-      console.log(values)
+      const response = await fetch(`${baseURL}admin/signin/`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(values),
+      })
+      if (response.ok) {
+        const data = await response.json();
+        const contextData = await login(data.access, data.refresh)
+        setLoading(false)
+        if (contextData === true) {
+          window.location.href = "/";
+        }
+      } else {
+        setLoading(false)
+        console.error('Login failed:', await response.json());
+      }
       toast(
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(values, null, 2)}</code>
         </pre>,
       )
     } catch (error) {
+      setLoading(false)
       console.error('Form submission error', error)
       toast.error('Failed to submit the form. Please try again.')
     }
@@ -115,8 +138,34 @@ export default function LoginComponent() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
-                  Login
+                <Button type="submit" className="w-full flex items-center justify-center" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 mr-3"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 0112-6.93 8 8 0 100 13.86A8 8 0 014 12z"
+                        />
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
               </div>
             </form>
