@@ -4,7 +4,6 @@ import Link from 'next/link'
 import {z} from 'zod'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {useForm} from 'react-hook-form'
-import {toast} from 'sonner'
 
 import {
   Form,
@@ -26,7 +25,7 @@ import {Input} from '@/components/ui/input'
 import baseURL from "@/app/Components/BaseURL";
 import {useAuth} from "@/app/Context/AuthContext";
 import {useState} from "react";
-
+import {useToast} from "@/hooks/use-toast";
 
 const formSchema = z.object({
   username: z.string(),
@@ -47,6 +46,8 @@ export default function LoginComponent() {
 
   const {login} = useAuth()
   const [loading, setLoading] = useState(false);
+  const {toast} = useToast()
+
 
   async function onSubmit(values) {
     setLoading(true)
@@ -56,6 +57,7 @@ export default function LoginComponent() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(values),
       })
+      debugger
       if (response.ok) {
         const data = await response.json();
         const contextData = await login(data.access, data.refresh)
@@ -65,17 +67,28 @@ export default function LoginComponent() {
         }
       } else {
         setLoading(false)
-        console.error('Login failed:', await response.json());
+        const data = await response.json()
+        console.log(data)
+        if (data.detail) {
+          toast({
+            variant: "destructive",
+            description: data.detail,
+          })
+        } else {
+          toast({
+            variant: "destructive",
+            description: data.non_field_errors[0],
+          })
+        }
+        // console.error('Login failed:', await response.json());
       }
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>,
-      )
     } catch (error) {
       setLoading(false)
       console.error('Form submission error', error)
-      toast.error('Failed to submit the form. Please try again.')
+      toast({
+        variant: "destructive",
+        description: 'Failed to submit the form. Please try again.'
+      })
     }
   }
 
