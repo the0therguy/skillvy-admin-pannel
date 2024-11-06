@@ -41,13 +41,13 @@ export const AuthProvider = ({children}) => {
 
   const logout = async () => {
     const accessToken = localStorage.getItem('access_token');
+    const refreshToken = localStorage.getItem('refresh_token');
     const response = await fetch(`${BaseURL}logout/`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({access_token: accessToken}),
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`,},
+      body: JSON.stringify({refresh_token: refreshToken}),
     })
     const data = await response.json()
-    console.log(data)
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setIsAuthenticated(false);
