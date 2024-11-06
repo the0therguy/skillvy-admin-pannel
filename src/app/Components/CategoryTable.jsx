@@ -1,5 +1,6 @@
 "use client"
 import React, {useEffect, useState} from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -29,6 +30,7 @@ const CategoryTable = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const {toast} = useToast()
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -96,6 +98,12 @@ const CategoryTable = () => {
           setSelectedCategory={selectedCategory}
         />
       )}
+
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => router.push('/category/add')} variant="link">
+          <h1>Add Category</h1>
+        </Button>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
