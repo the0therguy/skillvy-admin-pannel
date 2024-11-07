@@ -12,5 +12,5 @@ export function middleware(request) {
 
 // Configure middleware to run on specific routes or globally
 export const config = {
-  matcher: ['/dashboard/:path*', '/protected-route/:path*'], // Adjust to your protected routes
+  matcher: [], // Adjust to your protected routes
 };
