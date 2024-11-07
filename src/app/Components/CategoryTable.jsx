@@ -90,7 +90,7 @@ const CategoryTable = () => {
   };
 
   return (
-    <>
+    <div>
       {selectedCategory && (
         <CategoryEditComponent
           category={selectedCategory}
@@ -100,7 +100,7 @@ const CategoryTable = () => {
         />
       )}
 
-      <div className="flex justify-end mb-4">
+      <div className="mb-4">
         <Button onClick={() => router.push('/category/add')} variant="link">
           <h1>Add Category</h1>
         </Button>
@@ -169,7 +169,7 @@ const CategoryTable = () => {
           ))}
         </TableBody>
       </Table>
-    </>
+    </div>
   );
 };
 

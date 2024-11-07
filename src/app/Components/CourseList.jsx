@@ -40,7 +40,7 @@ export default function CourseList() {
 
   // Function to handle edit button click
   const handleEdit = (courseId) => {
-    router.push(`/edit-course/${courseId}`);
+    router.push(`/course/edit/${courseId}`);
   };
 
   // Function to handle delete button click
