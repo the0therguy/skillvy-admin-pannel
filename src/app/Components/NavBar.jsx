@@ -26,7 +26,9 @@ export default function NavBar() {
       <div className="flex items-center justify-between px-4 py-4 bg-[#022660]">
 
         <div className="flex items-center">
-          <Image src="/logo-home.png" alt="logo" width={80} height={60} />
+          <Link href='/'>
+            <Image src="/logo-home.png" alt="logo" width={80} height={60} />
+          </Link>
         </div>
 
         {/* Navigation Menu */}
@@ -37,13 +39,13 @@ export default function NavBar() {
               <NavigationMenuTrigger>
                 <Avatar>
                   <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                  <AvatarFallback>{user.username}</AvatarFallback>
+                  <AvatarFallback>{user?.username}</AvatarFallback>
                 </Avatar>
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="flex flex-col p-4">
                   {isAuthenticated ? (
-                    <span>Hi, {user.username}</span>
+                    <span>Hi, {user?.username}</span>
                   ): null}
                   <hr/>
                   {isAuthenticated ? (
