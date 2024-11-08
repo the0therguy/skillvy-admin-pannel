@@ -1,11 +1,5 @@
 "use client"
 import {
-  useState
-} from "react"
-import {
-  toast
-} from "sonner"
-import {
   useForm
 } from "react-hook-form"
 import {
@@ -38,38 +32,73 @@ import {
 import {
   Textarea
 } from "@/components/ui/textarea"
+import {useCategories} from "@/app/Context/CategoryContext";
+import {useAuth} from "@/app/Context/AuthContext";
+import {useToast} from "@/hooks/use-toast";
+import baseURL from "@/app/Components/BaseURL";
 
 const formSchema = z.object({
   courseCategory: z.string(),
-  courseName: z.string().max(200),
-  courseOverview: z.string(),
-  courseDuration: z.number().optional(),
-  courseLectures: z.number().optional(),
-  courseLanguage: z.string(),
-  skillLevel: z.string(),
-  quizes: z.number().optional(),
+  course_name: z.string().max(200),
+  course_overview: z.string(),
+  course_duration: z.number().optional(),
+  lectures: z.number().optional(),
+  language: z.string(),
+  skill_level: z.string(),
+  quizzes: z.number().optional(),
   access: z.string(),
-  courseDescription: z.string().optional()
+  course_description: z.string().optional()
 });
 
-export default function CourseFormComponent() {
+export default function CourseFormComponent({setCourseAdd, setCourseUuid}) {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-
   })
+
+  const {categories} = useCategories()
+  const {isAuthenticated} = useAuth()
+  const {toast} = useToast()
 
   async function onSubmit(values) {
     try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      if (!isAuthenticated) {
+        toast({description: "Session Expired. Please login again", variant: "destructive"})
+        window.location.href = '/login'
+      }
+      const course_uuid = crypto.randomUUID()
+      values['course_uuid'] = course_uuid
+      setCourseUuid(course_uuid)
+      const response = await fetch(`${baseURL}courses/${values.courseCategory}/1/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values)
+      })
+
+      if (response.ok) {
+        setCourseAdd(true)
+        toast({
+          description: "Course Added successfully"
+        })
+      } else {
+        const data = await response.json()
+        const errorString = Object.entries(data)
+          .map(([key, value]) => `${key}: ${value.join(', ')}`)
+          .join('\n');
+        toast({
+          description: errorString,
+          variant: "destructive"
+        })
+      }
+
     } catch (error) {
       console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      toast({
+        description: error,
+        variant: "destructive"
+      })
     }
   }
 
@@ -90,11 +119,11 @@ export default function CourseFormComponent() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="English Courses">English Courses</SelectItem>
-                  <SelectItem value="Functional Skill Courses">Functional Skill Courses</SelectItem>
-                  <SelectItem value="Post Graduate Courses">Post Graduate Courses</SelectItem>
-                  <SelectItem value="Undergraduate Courses">Undergraduate Courses</SelectItem>
-                  <SelectItem value="Professional Courses">Professional Courses</SelectItem>
+                  {
+                    categories && categories.map((category, index) => (
+                      <SelectItem key={index} value={category.category_name}>{category.category_name}</SelectItem>
+                    ))
+                  }
                 </SelectContent>
               </Select>
               <FormDescription>Course Category</FormDescription>
@@ -105,7 +134,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="courseName"
+          name="course_name"
           render={({field}) => (
             <FormItem>
               <FormLabel>Course Name</FormLabel>
@@ -124,7 +153,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="courseOverview"
+          name="course_overview"
           render={({field}) => (
             <FormItem>
               <FormLabel>Course Overview</FormLabel>
@@ -143,7 +172,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="courseDuration"
+          name="course_duration"
           render={({field}) => (
             <FormItem>
               <FormLabel>Course Duration</FormLabel>
@@ -152,7 +181,9 @@ export default function CourseFormComponent() {
                   placeholder="Duration"
 
                   type="number"
-                  {...field} />
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
               </FormControl>
               <FormDescription>Duration of the course</FormDescription>
               <FormMessage/>
@@ -162,7 +193,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="courseLectures"
+          name="lectures"
           render={({field}) => (
             <FormItem>
               <FormLabel>Lectures</FormLabel>
@@ -171,7 +202,9 @@ export default function CourseFormComponent() {
                   placeholder="Lectures"
 
                   type="number"
-                  {...field} />
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
               </FormControl>
               <FormDescription>Number of lectures need to complete this course</FormDescription>
               <FormMessage/>
@@ -181,7 +214,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="courseLanguage"
+          name="language"
           render={({field}) => (
             <FormItem>
               <FormLabel>Language</FormLabel>
@@ -200,7 +233,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="skillLevel"
+          name="skill_level"
           render={({field}) => (
             <FormItem>
               <FormLabel>Skill Level</FormLabel>
@@ -211,11 +244,12 @@ export default function CourseFormComponent() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Full Lifetime">Full Lifetime</SelectItem>
-                  <SelectItem value="Limited">Limited</SelectItem>
+                  <SelectItem value="Beginner">Beginner</SelectItem>
+                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                  <SelectItem value="Professional">Professional</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>What's the skill level of this course</FormDescription>
+              <FormDescription>What&#39;s the skill level of this course</FormDescription>
               <FormMessage/>
             </FormItem>
           )}
@@ -223,16 +257,17 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="quizes"
+          name="quizzes"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Quizes</FormLabel>
+              <FormLabel>quizzes</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Quizes"
-
+                  placeholder="quizzes"
                   type="number"
-                  {...field} />
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
               </FormControl>
               <FormDescription>Number of quiz in the course</FormDescription>
               <FormMessage/>
@@ -253,9 +288,8 @@ export default function CourseFormComponent() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
+                  <SelectItem value="Full Lifetime">Full Lifetime</SelectItem>
+                  <SelectItem value="Limited">Limited</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>Course Access</FormDescription>
@@ -266,7 +300,7 @@ export default function CourseFormComponent() {
 
         <FormField
           control={form.control}
-          name="courseDescription"
+          name="course_description"
           render={({field}) => (
             <FormItem>
               <FormLabel>Course Description</FormLabel>

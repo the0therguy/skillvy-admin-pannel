@@ -1,6 +1,6 @@
 "use client"
 import React, {useEffect, useState} from 'react';
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -24,28 +24,19 @@ import {useToast} from "@/hooks/use-toast";
 import BaseURL from "@/app/Components/BaseURL";
 import CategoryEditComponent from "@/app/Components/CategoryEditComponent";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {useCategories} from "@/app/Context/CategoryContext";
 
 const CategoryTable = () => {
-  const [categories, setCategories] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const {toast} = useToast()
   const router = useRouter();
-
-
-  useEffect(() => {
-    fetch(`${BaseURL}categories/`, {
-      method: "GET",
-      headers: {'Content-Type': 'application/json'}
-    }) // Replace with your actual API endpoint
-      .then((response) => response.json())
-      .then((data) => setCategories(data))
-      .catch((error) => console.error("Error fetching categories:", error));
-  }, []);
+  const {categories, removeCategory} = useCategories()
 
   const handleEdit = (id) => {
     // Handle edit action
+    debugger
     console.log(`Editing category with ID: ${id}`);
     setSelectedCategory(categories[id]);
     setIsDialogOpen(true);
@@ -73,9 +64,7 @@ const CategoryTable = () => {
         });
 
         if (response.ok) {
-          setCategories((prevCategories) =>
-            prevCategories.filter((cat) => cat.category_uuid !== selectedCategory.category_uuid)
-          );
+          removeCategory(selectedCategory)
           toast({description: "Category deleted successfully."});
         } else {
           console.error("Failed to delete category");
@@ -96,7 +85,7 @@ const CategoryTable = () => {
           category={selectedCategory}
           isDialogOpen={isDialogOpen}
           setIsDialogOpen={setIsDialogOpen}
-          setSelectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
         />
       )}
 
@@ -147,7 +136,7 @@ const CategoryTable = () => {
                 <button onClick={() => handleEdit(index)} className="text-blue-600 hover:text-blue-800">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger><PencilSquareIcon className="w-5 h-5" aria-hidden="true" /></TooltipTrigger>
+                      <TooltipTrigger><PencilSquareIcon className="w-5 h-5" aria-hidden="true"/></TooltipTrigger>
                       <TooltipContent>
                         <p>Edit</p>
                       </TooltipContent>
@@ -157,7 +146,7 @@ const CategoryTable = () => {
                 <button onClick={() => handleDelete(index)} className="text-red-600 hover:text-red-800">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger><TrashIcon className="w-5 h-5" aria-hidden="true" /></TooltipTrigger>
+                      <TooltipTrigger><TrashIcon className="w-5 h-5" aria-hidden="true"/></TooltipTrigger>
                       <TooltipContent>
                         <p>Delete</p>
                       </TooltipContent>

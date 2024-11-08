@@ -3,6 +3,7 @@ import "./globals.css";
 import {AuthProvider} from "@/app/Context/AuthContext";
 import { Toaster } from "@/components/ui/toaster"
 import NavBar from "@/app/Components/NavBar";
+import {CategoryProvider} from "@/app/Context/CategoryContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,9 +28,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
       <AuthProvider>
-        <NavBar />
-        {children}
-        <Toaster />
+        <CategoryProvider>
+          <NavBar />
+          {children}
+          <Toaster />
+        </CategoryProvider>
       </AuthProvider>
       </body>
     </html>

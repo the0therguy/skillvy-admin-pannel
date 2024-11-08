@@ -40,10 +40,10 @@ export default function CategoryEditComponent({category, isDialogOpen, setIsDial
         },
         body: JSON.stringify(formData),
       });
-
+      debugger
       if (response.ok) {
-        toast({description: "Category Updated successfully."});
         setSelectedCategory(null)
+        toast({description: "Category Updated successfully."});
         setIsDialogOpen(false); // Close the dialog on success
       } else {
         console.error("Failed to update category");

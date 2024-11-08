@@ -36,10 +36,11 @@ import {
 import {useRouter} from 'next/navigation';
 import BaseURL from "@/app/Components/BaseURL";
 import {useToast} from "@/hooks/use-toast";
+import {useCategories} from "@/app/Context/CategoryContext";
 
 const formSchema = z.object({
   category_name: z.string().max(200),
-  description: z.string().optional()
+  category_description: z.string().optional()
 });
 
 export default function CategoryFormComponent() {
@@ -48,12 +49,12 @@ export default function CategoryFormComponent() {
   })
   const router = useRouter();
   const {toast} = useToast()
+  const {addCategory} = useCategories()
 
 
   async function onSubmit(values) {
     try {
       values['category_uuid'] = crypto.randomUUID()
-      console.log(values);
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) window.location.href = '/login';
       const response = await fetch(`${BaseURL}categories/`, {
@@ -65,8 +66,8 @@ export default function CategoryFormComponent() {
         body: JSON.stringify(values)
       })
       const data = await response.json()
-      console.log(data)
       if (response.ok) {
+        addCategory(data)
         form.reset()
         toast({description: "Category Added successfully."});
       }
@@ -98,7 +99,7 @@ export default function CategoryFormComponent() {
 
           <FormField
             control={form.control}
-            name="description"
+            name="category_description"
             render={({field}) => (
               <FormItem>
                 <FormLabel>Category Description</FormLabel>
