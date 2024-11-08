@@ -19,15 +19,14 @@ import {
 import Image from "next/image";
 
 export default function NavBar() {
-  const {isAuthenticated, logout} = useAuth();
+  const {isAuthenticated, logout, user} = useAuth();
 
   return (
     <>
-      <div className="flex items-center justify-between px-4 py-4 bg-gray-100">
-        {/* Logo */}
+      <div className="flex items-center justify-between px-4 py-4 bg-[#022660]">
+
         <div className="flex items-center">
-          {/*<img src="/path/to/logo.png" alt="Logo" className="h-8 w-8 mr-2"/>*/}
-          <Image src="/next.svg" alt="logo" width={100} height={80} />
+          <Image src="/logo-home.png" alt="logo" width={80} height={60} />
         </div>
 
         {/* Navigation Menu */}
@@ -38,11 +37,15 @@ export default function NavBar() {
               <NavigationMenuTrigger>
                 <Avatar>
                   <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarFallback>{user.username}</AvatarFallback>
                 </Avatar>
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="flex flex-col p-4">
+                  {isAuthenticated ? (
+                    <span>Hi, {user.username}</span>
+                  ): null}
+                  <hr/>
                   {isAuthenticated ? (
                     <>
                       <NavigationMenuLink asChild>
@@ -50,6 +53,7 @@ export default function NavBar() {
                           <>Change Password</>
                         </Link>
                       </NavigationMenuLink>
+                      <hr/>
                       <NavigationMenuLink asChild>
                         <button onClick={logout} className="mt-2">
                           Logout
