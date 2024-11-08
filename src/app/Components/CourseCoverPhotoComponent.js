@@ -5,10 +5,10 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
-import {toast} from "sonner";
 import {cn} from "@/lib/utils";
 import {ImagePlus, X, Loader2} from "lucide-react";
 import baseURL from "@/app/Components/BaseURL";
+import {useToast} from "@/hooks/use-toast";
 
 // Form schema using Zod
 const formSchema = z.object({
@@ -28,6 +28,8 @@ const formSchema = z.object({
 const CourseCoverPhotoComponent = ({courseAdd, courseUuid}) => {
   const [preview, setPreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const {toast} = useToast()
+
 
   const {
     register,
@@ -43,23 +45,35 @@ const CourseCoverPhotoComponent = ({courseAdd, courseUuid}) => {
     debugger
     try {
       setIsLoading(true);
-      // Simulating upload - replace with your actual upload logic
-      // await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Form data:", data);
-      const response = await fetch(`${baseURL}course-image-update/${courseUuid}/`, {
-          method: "PUT",
-          body: data,
-        }
-      )
-      const responseData = await response.json();
-      console.log(responseData)
+      const fileInput = document.getElementById("image-upload");
+      console.log(data)
 
-      toast.success("Image uploaded successfully!");
-      // Reset form after successful upload
-      // reset();
-      setPreview(null);
+      // Create FormData and append the file
+      const formData = new FormData();
+      formData.append("image", data.image);
+
+      // Setup request options
+      const requestOptions = {
+        method: "PUT",
+        body: formData,
+        redirect: "follow",
+      };
+
+      // Send the request
+      const response = await fetch(`${baseURL}course-image-update/${courseUuid}/`, requestOptions);
+      const result = await response.json(); // Parse the response as JSON
+      if (response.ok) {
+        toast({description: "Image added successfully"})
+        setPreview(null);
+        reset()
+      } else {
+        console.log(result)
+        toast({description: result.details, variant: "destructive"})
+      }
+
     } catch (error) {
-      toast.error("Failed to upload image");
+      // Error handling
+      toast({description: error.message, variant: "destructive"});
       console.error("Upload error:", error);
     } finally {
       setIsLoading(false);
