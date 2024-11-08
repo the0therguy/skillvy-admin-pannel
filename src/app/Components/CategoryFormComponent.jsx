@@ -77,9 +77,10 @@ export default function CategoryFormComponent() {
   }
 
   return (
-    <>
+    <div>
+      <h1 className="space-y-8 mx-auto py-10 text-2xl font-bold mb-6">Add Category</h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-5xl mx-auto py-10">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
           <FormField
             control={form.control}
             name="category_name"
@@ -117,6 +118,6 @@ export default function CategoryFormComponent() {
           <h1> Back to home</h1>
         </Button>
       </div>
-    </>
+    </div>
   )
 }
