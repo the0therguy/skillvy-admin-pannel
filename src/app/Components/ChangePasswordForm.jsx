@@ -1,9 +1,6 @@
 "use client"
 
 import {
-  toast
-} from "sonner"
-import {
   useForm
 } from "react-hook-form"
 import {
@@ -25,6 +22,8 @@ import {
 } from "@/components/ui/form"
 import {Input} from '@/components/ui/input'
 import {useToast} from "@/hooks/use-toast";
+import BaseURL from "@/app/Components/BaseURL";
+import {useState} from "react";
 
 
 const formSchema = z.object({
@@ -41,26 +40,40 @@ export default function ChangePasswordForm() {
   })
 
   const {toast} = useToast()
+  const [loading, setLoading] = useState(false);
 
 
   async function onSubmit(values) {
+    setLoading(true)
     try {
-      const accessToken = localStorage.getItem("accessToken")
+      const accessToken = localStorage.getItem("access_token")
       if (!accessToken) {
-        window.location.href = '/'
+        window.location.href = '/login'
       }
-      console.log(values);
       if (values.new_password === values.re_new_password) {
-
+        delete values.re_new_password
+        const response = await fetch(`${BaseURL}change-password/`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(values)
+        })
+        const data = await response.json()
+        if (!response.ok) {
+          toast({description: data.message, variant: "destructive"});
+        }
+        toast({description: data.message});
+        setLoading(false)
+      } else {
+        toast({description: "New password and retype new password doesn't match", variant: "destructive"})
+        setLoading(false)
       }
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
     } catch (error) {
       console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      toast({description: "Failed to submit the form. Please try again.", variant: "destructive"});
+      setLoading(false)
     }
   }
 
@@ -124,7 +137,35 @@ export default function ChangePasswordForm() {
           )}
         />
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit" className="flex items-center justify-center" disabled={loading}>
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 mr-3"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 0112-6.93 8 8 0 100 13.86A8 8 0 014 12z"
+                />
+              </svg>
+              Loading...
+            </>
+          ) : (
+            "Change Password"
+          )}
+        </Button>
       </form>
     </Form>
   )

@@ -57,7 +57,6 @@ export default function LoginComponent() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(values),
       })
-      debugger
       if (response.ok) {
         const data = await response.json();
         const contextData = await login(data.access, data.refresh)
@@ -68,7 +67,6 @@ export default function LoginComponent() {
       } else {
         setLoading(false)
         const data = await response.json()
-        console.log(data)
         if (data.detail) {
           toast({
             variant: "destructive",
