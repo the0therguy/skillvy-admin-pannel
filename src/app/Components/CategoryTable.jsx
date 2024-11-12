@@ -36,7 +36,7 @@ const CategoryTable = () => {
 
   const handleEdit = (id) => {
     // Handle edit action
-    debugger
+
     console.log(`Editing category with ID: ${id}`);
     setSelectedCategory(categories[id]);
     setIsDialogOpen(true);
