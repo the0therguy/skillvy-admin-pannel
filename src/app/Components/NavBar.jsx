@@ -28,23 +28,39 @@ export default function NavBar() {
         {/* Logo */}
         <div className="flex items-center">
           <Link href='/'>
-            <Image src="/logo-home.png" alt="logo" width={80} height={60} />
+            <Image src="/logo-home.png" alt="logo" width={80} height={60}/>
           </Link>
         </div>
 
         {/* Centered Contact Us Link */}
         <div className="flex-1 flex justify-center">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link href="/contact-us" className="text-[#EA901A] hover:underline">
-                    Contact Us
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          <div className="mr-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link href="/contact-us" className="text-[#EA901A] hover:underline">
+                      Contact Us
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+          <div>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link href="/apply-now" className="text-[#EA901A] hover:underline">
+                      Applicant
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+
         </div>
 
         {/* User Dropdown */}
@@ -53,7 +69,7 @@ export default function NavBar() {
             <NavigationMenuItem>
               <NavigationMenuTrigger>
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn"/>
                   <AvatarFallback>{user?.username}</AvatarFallback>
                 </Avatar>
               </NavigationMenuTrigger>
@@ -62,7 +78,7 @@ export default function NavBar() {
                   {isAuthenticated ? (
                     <span>Hi, {user?.username}</span>
                   ) : null}
-                  <hr />
+                  <hr/>
                   {isAuthenticated ? (
                     <>
                       <NavigationMenuLink asChild>
@@ -70,7 +86,7 @@ export default function NavBar() {
                           <>Change Password</>
                         </Link>
                       </NavigationMenuLink>
-                      <hr />
+                      <hr/>
                       <NavigationMenuLink asChild>
                         <button onClick={logout} className="mt-2">
                           Logout
@@ -90,7 +106,7 @@ export default function NavBar() {
           </NavigationMenuList>
         </NavigationMenu>
       </div>
-      <hr />
+      <hr/>
     </>
   );
 }
